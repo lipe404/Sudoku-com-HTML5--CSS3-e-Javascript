@@ -273,3 +273,28 @@
       padding: 10px;
     }
   }
+
+.header-container {
+  display: flex;
+  align-items: center; /* Alinha verticalmente o título e o botão */
+  justify-content: center; /* Centraliza o conteúdo horizontalmente */
+  margin-bottom: 20px; /* Espaço abaixo do cabeçalho */
+}
+
+#play-button {
+  margin-left: 15px; /* Espaço entre o título e o botão */
+  padding: 12px 24px; /* Tamanho do botão */
+  font-size: clamp(1rem, 4vw, 1.2rem); /* Tamanho da fonte */
+  color: var(--white); /* Cor do texto */
+  background-color: var(--primary-color); /* Cor de fundo */
+  border: none; /* Remove borda padrão */
+  border-radius: 20px; /* Bordas arredondadas */
+  cursor: pointer; /* Muda o cursor ao passar o mouse */
+  transition: all 0.3s ease; /* Transição suave para efeitos */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra do botão */
+}
+
+#play-button:hover {
+  background-color: var(--secondary-color); /* Cor de fundo ao passar o mouse */
+  transform: scale(1.05); /* Efeito de aumento ao passar o mouse */
+}

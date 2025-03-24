@@ -326,3 +326,11 @@ document.addEventListener("DOMContentLoaded", () => {
         return array;
     }
 });
+
+document.getElementById('play-button').addEventListener('click', function() {
+
+    const audioPlayer = document.getElementById('audio-player');
+
+    audioPlayer.play();
+
+});
