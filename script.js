@@ -1,140 +1,112 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const grid = document.getElementById("sudoku-grid");
-    const cells = [];
+    // Constantes e configurações
     const SIZE = 9;
     const SUBGRID_SIZE = 3;
-    let currentBoard = createEmptyBoard();
-
-    // Inicializa o modal personalizado
+    const MIN_REMOVED_CELLS = 40;
+    const MAX_REMOVED_CELLS = 49;
+    const MAX_ATTEMPTS = 200;
+    
+    // Elementos DOM
+    const grid = document.getElementById("sudoku-grid");
+    const solveButton = document.getElementById("solve-button");
     const modal = document.getElementById("customModal");
     const modalButton = document.getElementById("modalButton");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalMessage = document.getElementById("modalMessage");
+    
+    // Estado do jogo
+    const cells = [];
+    let currentBoard = createEmptyBoard();
 
-    modalButton.addEventListener("click", () => {
-        modal.style.display = "none";
-    });
+    // Inicialização do jogo
+    initGame();
 
-    window.addEventListener("click", (event) => {
-        if (event.target === modal) {
-            modal.style.display = "none";
-        }
-    });
-
-    // Cria a grade do Sudoku
-    for (let i = 0; i < SIZE * SIZE; i++) {
-        const cell = document.createElement("input");
-        cell.type = "text";
-        cell.className = "cell";
-        cell.maxLength = 1;
-        cell.dataset.index = i;
-        
-        // Validação de entrada - permite apenas números de 1 a 9
-        cell.addEventListener("input", (e) => {
-            const value = e.target.value;
-            if (value && !/^[1-9]$/.test(value)) {
-                e.target.value = "";
-            }
-        });
-        
-        cells.push(cell);
-        grid.appendChild(cell);
+    // Função principal de inicialização
+    function initGame() {
+        setupModal();
+        createGrid();
+        generateSudoku();
+        setupSolveButton();
     }
 
-    // Gera um novo jogo quando a página carrega
-    generateSudoku();
+    // Configuração do modal
+    function setupModal() {
+        modalButton.addEventListener("click", () => modal.style.display = "none");
+        window.addEventListener("click", (event) => {
+            if (event.target === modal) modal.style.display = "none";
+        });
+    }
 
-    // Botão para resolver o Sudoku
-    document.getElementById("solve-button").addEventListener("click", () => {
-        // Primeiro verifica se o tabuleiro atual é válido
+    // Criação da grade
+    function createGrid() {
+        for (let i = 0; i < SIZE * SIZE; i++) {
+            const cell = document.createElement("input");
+            cell.type = "text";
+            cell.className = "cell";
+            cell.maxLength = 1;
+            cell.dataset.index = i;
+            
+            cell.addEventListener("input", validateCellInput);
+            cells.push(cell);
+            grid.appendChild(cell);
+        }
+    }
+
+    // Validação de entrada da célula
+    function validateCellInput(e) {
+        const value = e.target.value;
+        if (value && !/^[1-9]$/.test(value)) {
+            e.target.value = "";
+        }
+    }
+
+    // Configuração do botão de resolver
+    function setupSolveButton() {
+        solveButton.addEventListener("click", solveCurrentSudoku);
+    }
+
+    // Lógica para resolver o Sudoku atual
+    function solveCurrentSudoku() {
         if (!isCurrentBoardValid()) {
-            alert("O tabuleiro contém valores inválidos. Corrija antes de resolver.");
+            showCustomAlert("Atenção", "O tabuleiro contém valores inválidos. Corrija antes de resolver.", "error");
             return;
         }
         
-        // Cria uma cópia do tabuleiro atual para resolver
         const boardToSolve = getCurrentBoardState();
         
-        // Tenta resolver o Sudoku
         if (solveSudoku(boardToSolve)) {
             updateCellsFromBoard(boardToSolve);
             showCustomAlert("Parabéns Mozi!", "Você é a melhor!", "success");
         } else {
-            showCustomAlert("Poxa Mozi", "Tenta de novo ai", "error");
+            showCustomAlert("Poxa Mozi", "Tenta de novo aí", "error");
         }
-        if (solveSudoku(boardToSolve)) {
-            updateCellsFromBoard(boardToSolve);
-            showCustomAlert("Parabéns Mozi!", "Você é a melhor!", "success");
-        } else {
-            showCustomAlert("Poxa Mozi", "Tenta de novo ai", "error");
-        }
-        
-        // Adicione estas funções auxiliares:
-        function showCustomAlert(title, message, type) {
-            const modal = document.getElementById("customModal");
-            const modalTitle = document.getElementById("modalTitle");
-            const modalMessage = document.getElementById("modalMessage");
-            const modalButton = document.getElementById("modalButton");
-            
-            modalTitle.textContent = title;
-            modalMessage.textContent = message;
-            
-            // Estilo baseado no tipo (success/error)
-            const content = modal.querySelector(".modal-content");
-            if (type === "success") {
-                content.style.background = "linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)";
-                modalButton.style.backgroundColor = "#ffcc00";
-            } else {
-                content.style.background = "linear-gradient(135deg, #f44336 0%, #c62828 100%)";
-                modalButton.style.backgroundColor = "#ffcc00";
-            }
-            
-            modal.style.display = "block";
-            
-            // Fechar modal quando clicar no botão
-            modalButton.onclick = function() {
-                modal.style.display = "none";
-            }
-            
-            // Fechar modal quando clicar fora da área de conteúdo
-            modal.onclick = function(event) {
-                if (event.target === modal) {
-                    modal.style.display = "none";
-                }
-            }
-        }
-    });
+    }
 
-    // Gera um novo jogo de Sudoku
+    // Geração de um novo Sudoku
     function generateSudoku() {
-        // Limpa o tabuleiro atual
         currentBoard = createEmptyBoard();
         clearAllCells();
         
-        // Gera um tabuleiro completo válido
         fillBoard(currentBoard);
-        
-        // Remove alguns números para criar o puzzle
         removeNumbers(currentBoard);
-        
-        // Preenche as células da interface
         fillCells(currentBoard);
     }
 
+    // Funções auxiliares do Sudoku
     function createEmptyBoard() {
         return Array.from({ length: SIZE }, () => Array(SIZE).fill(0));
     }
 
     function fillBoard(board) {
-        // Tenta preencher o tabuleiro com backtracking
         for (let row = 0; row < SIZE; row++) {
             for (let col = 0; col < SIZE; col++) {
                 if (board[row][col] === 0) {
                     const numbers = shuffleArray([...Array(SIZE).keys()].map(n => n + 1));
+                    
                     for (const num of numbers) {
                         if (isValidPlacement(num, row, col, board)) {
                             board[row][col] = num;
-                            if (fillBoard(board)) {
-                                return true;
-                            }
+                            if (fillBoard(board)) return true;
                             board[row][col] = 0; // Backtrack
                         }
                     }
@@ -146,11 +118,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function removeNumbers(board) {
-        let cellsToRemove = 40 + Math.floor(Math.random() * 10); // Remove entre 40-49 números
+        let cellsToRemove = MIN_REMOVED_CELLS + Math.floor(Math.random() * (MAX_REMOVED_CELLS - MIN_REMOVED_CELLS + 1));
         let attempts = 0;
-        const maxAttempts = 200;
         
-        while (cellsToRemove > 0 && attempts < maxAttempts) {
+        while (cellsToRemove > 0 && attempts < MAX_ATTEMPTS) {
             const row = Math.floor(Math.random() * SIZE);
             const col = Math.floor(Math.random() * SIZE);
             
@@ -158,7 +129,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 const temp = board[row][col];
                 board[row][col] = 0;
                 
-                // Verifica se ainda tem solução única
                 const boardCopy = board.map(row => [...row]);
                 if (countSolutions(boardCopy) === 1) {
                     cellsToRemove--;
@@ -193,15 +163,12 @@ document.addEventListener("DOMContentLoaded", () => {
         for (let row = 0; row < SIZE; row++) {
             for (let col = 0; col < SIZE; col++) {
                 const index = row * SIZE + col;
-                if (board[row][col] !== 0) {
-                    cells[index].value = board[row][col];
-                    cells[index].classList.add("fixed");
-                    cells[index].disabled = true;
-                } else {
-                    cells[index].value = "";
-                    cells[index].classList.remove("fixed");
-                    cells[index].disabled = false;
-                }
+                const cell = cells[index];
+                const value = board[row][col];
+                
+                cell.value = value || "";
+                cell.classList.toggle("fixed", value !== 0);
+                cell.disabled = value !== 0;
             }
         }
     }
@@ -213,9 +180,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     for (let num = 1; num <= SIZE; num++) {
                         if (isValidPlacement(num, row, col, board)) {
                             board[row][col] = num;
-                            if (solveSudoku(board)) {
-                                return true;
-                            }
+                            if (solveSudoku(board)) return true;
                             board[row][col] = 0; // Backtrack
                         }
                     }
@@ -227,23 +192,18 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function isValidPlacement(num, row, col, board) {
-        // Verifica a linha
+        // Verifica linha e coluna
         for (let i = 0; i < SIZE; i++) {
-            if (board[row][i] === num && i !== col) {
+            if ((board[row][i] === num && i !== col) || 
+                (board[i][col] === num && i !== row)) {
                 return false;
             }
         }
 
-        // Verifica a coluna
-        for (let i = 0; i < SIZE; i++) {
-            if (board[i][col] === num && i !== row) {
-                return false;
-            }
-        }
-
-        // Verifica o quadrante 3x3
+        // Verifica quadrante 3x3
         const startRow = Math.floor(row / SUBGRID_SIZE) * SUBGRID_SIZE;
         const startCol = Math.floor(col / SUBGRID_SIZE) * SUBGRID_SIZE;
+        
         for (let i = startRow; i < startRow + SUBGRID_SIZE; i++) {
             for (let j = startCol; j < startCol + SUBGRID_SIZE; j++) {
                 if (board[i][j] === num && i !== row && j !== col) {
@@ -262,10 +222,7 @@ document.addEventListener("DOMContentLoaded", () => {
             for (let col = 0; col < SIZE; col++) {
                 const num = board[row][col];
                 if (num !== 0 && !isValidPlacement(num, row, col, board)) {
-                    // Destaca a célula inválida
-                    const index = row * SIZE + col;
-                    cells[index].classList.add("invalid");
-                    setTimeout(() => cells[index].classList.remove("invalid"), 2000);
+                    highlightInvalidCell(row, col);
                     return false;
                 }
             }
@@ -273,25 +230,30 @@ document.addEventListener("DOMContentLoaded", () => {
         return true;
     }
 
+    function highlightInvalidCell(row, col) {
+        const index = row * SIZE + col;
+        cells[index].classList.add("invalid");
+        setTimeout(() => cells[index].classList.remove("invalid"), 2000);
+    }
+
     function getCurrentBoardState() {
         const board = createEmptyBoard();
-        for (let i = 0; i < SIZE * SIZE; i++) {
+        cells.forEach((cell, i) => {
             const row = Math.floor(i / SIZE);
             const col = i % SIZE;
-            board[row][col] = cells[i].value ? parseInt(cells[i].value) : 0;
-        }
+            board[row][col] = cell.value ? parseInt(cell.value) : 0;
+        });
         return board;
     }
 
     function updateCellsFromBoard(board) {
-        for (let row = 0; row < SIZE; row++) {
-            for (let col = 0; col < SIZE; col++) {
-                const index = row * SIZE + col;
-                if (!cells[index].classList.contains("fixed")) {
-                    cells[index].value = board[row][col];
-                }
+        cells.forEach((cell, i) => {
+            const row = Math.floor(i / SIZE);
+            const col = i % SIZE;
+            if (!cell.classList.contains("fixed")) {
+                cell.value = board[row][col];
             }
-        }
+        });
     }
 
     function clearAllCells() {
@@ -300,6 +262,18 @@ document.addEventListener("DOMContentLoaded", () => {
             cell.classList.remove("fixed", "invalid");
             cell.disabled = false;
         });
+    }
+
+    function showCustomAlert(title, message, type) {
+        modalTitle.textContent = title;
+        modalMessage.textContent = message;
+        
+        const content = modal.querySelector(".modal-content");
+        content.style.background = type === "success" 
+            ? "linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)" 
+            : "linear-gradient(135deg, #f44336 0%, #c62828 100%)";
+        
+        modal.style.display = "block";
     }
 
     function shuffleArray(array) {
