@@ -5,6 +5,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const SUBGRID_SIZE = 3;
     let currentBoard = createEmptyBoard();
 
+    // Inicializa o modal personalizado
+    const modal = document.getElementById("customModal");
+    const modalButton = document.getElementById("modalButton");
+
+    modalButton.addEventListener("click", () => {
+        modal.style.display = "none";
+    });
+
+    window.addEventListener("click", (event) => {
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    });
+
     // Cria a grade do Sudoku
     for (let i = 0; i < SIZE * SIZE; i++) {
         const cell = document.createElement("input");
@@ -41,11 +55,51 @@ document.addEventListener("DOMContentLoaded", () => {
         
         // Tenta resolver o Sudoku
         if (solveSudoku(boardToSolve)) {
-            // Atualiza a interface com a solução
             updateCellsFromBoard(boardToSolve);
-            alert("Seu jogo será resolvido!");
+            showCustomAlert("Parabéns Mozi!", "Você é a melhor!", "success");
         } else {
-            alert("Não foi possível resolver este Sudoku. O tabuleiro pode estar inválido.");
+            showCustomAlert("Poxa Mozi", "Tenta de novo ai", "error");
+        }
+        if (solveSudoku(boardToSolve)) {
+            updateCellsFromBoard(boardToSolve);
+            showCustomAlert("Parabéns Mozi!", "Você é a melhor!", "success");
+        } else {
+            showCustomAlert("Poxa Mozi", "Tenta de novo ai", "error");
+        }
+        
+        // Adicione estas funções auxiliares:
+        function showCustomAlert(title, message, type) {
+            const modal = document.getElementById("customModal");
+            const modalTitle = document.getElementById("modalTitle");
+            const modalMessage = document.getElementById("modalMessage");
+            const modalButton = document.getElementById("modalButton");
+            
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            
+            // Estilo baseado no tipo (success/error)
+            const content = modal.querySelector(".modal-content");
+            if (type === "success") {
+                content.style.background = "linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)";
+                modalButton.style.backgroundColor = "#ffcc00";
+            } else {
+                content.style.background = "linear-gradient(135deg, #f44336 0%, #c62828 100%)";
+                modalButton.style.backgroundColor = "#ffcc00";
+            }
+            
+            modal.style.display = "block";
+            
+            // Fechar modal quando clicar no botão
+            modalButton.onclick = function() {
+                modal.style.display = "none";
+            }
+            
+            // Fechar modal quando clicar fora da área de conteúdo
+            modal.onclick = function(event) {
+                if (event.target === modal) {
+                    modal.style.display = "none";
+                }
+            }
         }
     });
 
