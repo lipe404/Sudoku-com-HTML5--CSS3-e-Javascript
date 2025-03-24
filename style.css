@@ -125,6 +125,37 @@
     color: var(--dark-purple);
     font-weight: bolder;
   }
+
+/* Estilos aprimorados para destaque */
+.cell.selected {
+  background-color: rgba(33, 150, 243, 0.5) !important;
+  transform: scale(1.02);
+  transition: all 0.2s ease;
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.7) !important;
+  z-index: 1;
+  position: relative;
+}
+
+.cell.highlight {
+  background-color: rgba(255, 235, 59, 0.3);
+  box-shadow: 0 0 0 2px rgba(255, 235, 59, 0.7);
+}
+
+.cell.highlight-fixed {
+  background-color: rgba(139, 195, 74, 0.3);
+  box-shadow: 0 0 0 2px rgba(139, 195, 74, 0.7);
+}
+
+/* Melhorias para mobile */
+@media (max-width: 480px) {
+  .cell.selected {
+      box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.7) !important;
+  }
+  
+  .cell.highlight, .cell.highlight-fixed {
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.3);
+  }
+}
   
   /* ===== BOTÃO RESOLVER ===== */
   #solve-button {

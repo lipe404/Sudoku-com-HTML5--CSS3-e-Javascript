@@ -46,7 +46,14 @@ document.addEventListener("DOMContentLoaded", () => {
             cell.maxLength = 1;
             cell.dataset.index = i;
             
+            // Configura para mostrar teclado numérico em dispositivos móveis
+            cell.setAttribute("inputmode", "numeric");
+            cell.setAttribute("pattern", "[1-9]*");
+            
             cell.addEventListener("input", validateCellInput);
+            cell.addEventListener("click", highlightSameNumbers); // Nova funcionalidade
+            cell.addEventListener("focus", () => cell.select()); // Melhoria UX
+            
             cells.push(cell);
             grid.appendChild(cell);
         }
@@ -228,6 +235,41 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
         return true;
+    }
+
+    // NOVA FUNÇÃO: Destacar números iguais
+    function highlightSameNumbers(e) {
+        // Remove destaque anterior
+        cells.forEach(c => {
+            c.classList.remove("highlight", "selected", "highlight-fixed");
+            c.style.backgroundColor = '';
+            c.style.boxShadow = '';
+        });
+        
+        const clickedCell = e.target;
+        const clickedValue = clickedCell.value;
+        
+        if (!clickedValue) return;
+        
+        // Adiciona classe à célula clicada
+        clickedCell.classList.add("selected");
+        
+        // Destaca todas as células com o mesmo valor
+        cells.forEach(cell => {
+            if (cell.value === clickedValue) {
+                if (cell.classList.contains("fixed")) {
+                    // Destaque diferente para números fixos (pré-preenchidos)
+                    cell.classList.add("highlight-fixed");
+                    cell.style.backgroundColor = 'rgba(139, 195, 74, 0.3)';
+                    cell.style.boxShadow = '0 0 0 2px rgba(139, 195, 74, 0.7)';
+                } else {
+                    // Destaque para números inseridos pelo jogador
+                    cell.classList.add("highlight");
+                    cell.style.backgroundColor = 'rgba(255, 235, 59, 0.3)';
+                    cell.style.boxShadow = '0 0 0 2px rgba(255, 235, 59, 0.7)';
+                }
+            }
+        });
     }
 
     function highlightInvalidCell(row, col) {
