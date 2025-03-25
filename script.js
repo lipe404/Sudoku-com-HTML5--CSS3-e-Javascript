@@ -5,12 +5,39 @@ document.addEventListener("DOMContentLoaded", () => {
     const MIN_REMOVED_CELLS = 40;
     const MAX_REMOVED_CELLS = 49;
     const MAX_ATTEMPTS = 200;
-    // Cronômetro
+
+    // Elementos DOM
+    const grid = document.getElementById("sudoku-grid");
+    const solveButton = document.getElementById("solve-button");
+    const newGameButton = document.getElementById("new-game-button");
+    const modal = document.getElementById("customModal");
+    const modalButton = document.getElementById("modalButton");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalMessage = document.getElementById("modalMessage");
+    const audioPlayer = document.getElementById('audio-player');
+
+    // Estado do jogo
+    const cells = [];
+    let currentBoard = createEmptyBoard();
     let timerInterval;
     let seconds = 0;
 
+    // Inicialização do jogo
+    initGame();
+
+    // Função principal de inicialização
+    function initGame() {
+        setupModal();
+        createGrid();
+        generateSudoku();
+        setupSolveButton();
+        setupNewGameButton();
+        startTimer();
+    }
+
+    // Cronômetro
     function startTimer() {
-        clearInterval(timerInterval); // Limpa qualquer timer existente
+        clearInterval(timerInterval);
         seconds = 0;
         updateTimerDisplay();
         timerInterval = setInterval(() => {
@@ -24,35 +51,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const remainingSeconds = seconds % 60;
         document.getElementById('timer').textContent = 
             `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-    }
-
-    // Inicia o timer quando a página carrega
-    startTimer();
-    
-    // Elementos DOM
-    const grid = document.getElementById("sudoku-grid");
-    const solveButton = document.getElementById("solve-button");
-    const newGameButton = document.getElementById("new-game-button"); // Novo
-    const modal = document.getElementById("customModal");
-    const modalButton = document.getElementById("modalButton");
-    const modalTitle = document.getElementById("modalTitle");
-    const modalMessage = document.getElementById("modalMessage");
-    
-    // Estado do jogo
-    const cells = [];
-    let currentBoard = createEmptyBoard();
-
-    // Inicialização do jogo
-    initGame();
-
-    // Função principal de inicialização
-    function initGame() {
-        setupModal();
-        createGrid();
-        generateSudoku();
-        setupSolveButton();
-        setupNewGameButton(); 
-        startTimer(); // Reinicia o cronômetro
     }
 
     // Configuração do modal
@@ -71,15 +69,11 @@ document.addEventListener("DOMContentLoaded", () => {
             cell.className = "cell";
             cell.maxLength = 1;
             cell.dataset.index = i;
-            
-            // Configura para mostrar teclado numérico em dispositivos móveis
             cell.setAttribute("inputmode", "numeric");
             cell.setAttribute("pattern", "[1-9]*");
-            
             cell.addEventListener("input", validateCellInput);
-            cell.addEventListener("click", highlightSameNumbers); // Nova funcionalidade
-            cell.addEventListener("focus", () => cell.select()); // Melhoria UX
-            
+            cell.addEventListener("click", highlightSameNumbers);
+            cell.addEventListener("focus", () => cell.select());
             cells.push(cell);
             grid.appendChild(cell);
         }
@@ -94,9 +88,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Configuração do botão Novo Jogo
-function setupNewGameButton() {
-    newGameButton.addEventListener("click", resetGame);
-}
+    function setupNewGameButton() {
+        newGameButton.addEventListener("click", resetGame);
+    }
 
     // Configuração do botão de resolver
     function setupSolveButton() {
@@ -104,13 +98,12 @@ function setupNewGameButton() {
     }
 
     // Função para resetar o jogo
-function resetGame() {
-    clearInterval(timerInterval); // Para o cronômetro atual
-    generateSudoku(); // Gera um novo jogo
-    startTimer(); // Reinicia o cronômetro
-    // Limpa qualquer mensagem de sucesso anterior
-    modal.style.display = "none";
-}
+    function resetGame() {
+        clearInterval(timerInterval);
+        generateSudoku();
+        startTimer();
+        modal.style.display = "none";
+    }
 
     // Lógica para resolver o Sudoku atual
     function solveCurrentSudoku() {
@@ -123,14 +116,9 @@ function resetGame() {
         
         if (solveSudoku(boardToSolve)) {
             updateCellsFromBoard(boardToSolve);
-            // Para o cronômetro e pega o tempo final
             clearInterval(timerInterval);
             const finalTime = document.getElementById('timer').textContent;
-            showCustomAlert(
-                "Parabéns Mozi!", 
-                `Você completou em ${finalTime}! Você é a melhor!`, 
-                "success"
-            );
+            showCustomAlert("Parabéns Mozi!", `Você completou em ${finalTime}! Você é a melhor!`, "success");
         } else {
             showCustomAlert("Poxa Mozi", "Tenta de novo aí", "error");
         }
@@ -140,7 +128,6 @@ function resetGame() {
     function generateSudoku() {
         currentBoard = createEmptyBoard();
         clearAllCells();
-        
         fillBoard(currentBoard);
         removeNumbers(currentBoard);
         fillCells(currentBoard);
@@ -156,7 +143,6 @@ function resetGame() {
             for (let col = 0; col < SIZE; col++) {
                 if (board[row][col] === 0) {
                     const numbers = shuffleArray([...Array(SIZE).keys()].map(n => n + 1));
-                    
                     for (const num of numbers) {
                         if (isValidPlacement(num, row, col, board)) {
                             board[row][col] = num;
@@ -355,7 +341,7 @@ function resetGame() {
 
     function showCustomAlert(title, message, type) {
         if (type === "success") {
-            clearInterval(timerInterval); // Para o cronômetro quando o jogo é resolvido
+            clearInterval(timerInterval);
         }
         modalTitle.textContent = title;
         modalMessage.textContent = message;
@@ -375,12 +361,9 @@ function resetGame() {
         }
         return array;
     }
-});
 
-document.getElementById('play-button').addEventListener('click', function() {
-
-    const audioPlayer = document.getElementById('audio-player');
-
-    audioPlayer.play();
-
+    // Evento para tocar áudio
+    document.getElementById('play-button').addEventListener('click', function() {
+        audioPlayer.play();
+    });
 });
