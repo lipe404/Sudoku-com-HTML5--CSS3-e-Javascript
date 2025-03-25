@@ -108,6 +108,8 @@ function resetGame() {
     clearInterval(timerInterval); // Para o cronômetro atual
     generateSudoku(); // Gera um novo jogo
     startTimer(); // Reinicia o cronômetro
+    // Limpa qualquer mensagem de sucesso anterior
+    modal.style.display = "none";
 }
 
     // Lógica para resolver o Sudoku atual
@@ -121,7 +123,14 @@ function resetGame() {
         
         if (solveSudoku(boardToSolve)) {
             updateCellsFromBoard(boardToSolve);
-            showCustomAlert("Parabéns Mozi!", "Você é a melhor!", "success");
+            // Para o cronômetro e pega o tempo final
+            clearInterval(timerInterval);
+            const finalTime = document.getElementById('timer').textContent;
+            showCustomAlert(
+                "Parabéns Mozi!", 
+                `Você completou em ${finalTime}! Você é a melhor!`, 
+                "success"
+            );
         } else {
             showCustomAlert("Poxa Mozi", "Tenta de novo aí", "error");
         }
