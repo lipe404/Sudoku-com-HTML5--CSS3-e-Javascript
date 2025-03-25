@@ -156,6 +156,28 @@
       box-shadow: 0 0 0 1px rgba(0,0,0,0.3);
   }
 }
+
+/* ===== BOTÃO NOVO JOGO ===== */
+#new-game-button {
+  margin: 20px auto;
+    padding: 12px 24px;
+    font-size: clamp(1rem, 4vw, 1.2rem);
+    color: var(--white);
+    background-color: var(--primary-color);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    width: auto;
+    max-width: 200px;
+    display: block;
+}
+
+#new-game-button:hover {
+  background-color: var(--secondary-color);
+    transform: scale(1.05);
+}
   
   /* ===== BOTÃO RESOLVER ===== */
   #solve-button {
@@ -251,7 +273,6 @@
     }
     
     #solve-button {
-      width: 90%;
       max-width: none;
       padding: 12px;
     }

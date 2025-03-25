@@ -32,6 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Elementos DOM
     const grid = document.getElementById("sudoku-grid");
     const solveButton = document.getElementById("solve-button");
+    const newGameButton = document.getElementById("new-game-button"); // Novo
     const modal = document.getElementById("customModal");
     const modalButton = document.getElementById("modalButton");
     const modalTitle = document.getElementById("modalTitle");
@@ -50,6 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
         createGrid();
         generateSudoku();
         setupSolveButton();
+        setupNewGameButton(); 
         startTimer(); // Reinicia o cronômetro
     }
 
@@ -91,10 +93,22 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    // Configuração do botão Novo Jogo
+function setupNewGameButton() {
+    newGameButton.addEventListener("click", resetGame);
+}
+
     // Configuração do botão de resolver
     function setupSolveButton() {
         solveButton.addEventListener("click", solveCurrentSudoku);
     }
+
+    // Função para resetar o jogo
+function resetGame() {
+    clearInterval(timerInterval); // Para o cronômetro atual
+    generateSudoku(); // Gera um novo jogo
+    startTimer(); // Reinicia o cronômetro
+}
 
     // Lógica para resolver o Sudoku atual
     function solveCurrentSudoku() {
