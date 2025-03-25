@@ -5,6 +5,29 @@ document.addEventListener("DOMContentLoaded", () => {
     const MIN_REMOVED_CELLS = 40;
     const MAX_REMOVED_CELLS = 49;
     const MAX_ATTEMPTS = 200;
+    // Cronômetro
+    let timerInterval;
+    let seconds = 0;
+
+    function startTimer() {
+        clearInterval(timerInterval); // Limpa qualquer timer existente
+        seconds = 0;
+        updateTimerDisplay();
+        timerInterval = setInterval(() => {
+            seconds++;
+            updateTimerDisplay();
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        document.getElementById('timer').textContent = 
+            `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+    }
+
+    // Inicia o timer quando a página carrega
+    startTimer();
     
     // Elementos DOM
     const grid = document.getElementById("sudoku-grid");
@@ -27,6 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
         createGrid();
         generateSudoku();
         setupSolveButton();
+        startTimer(); // Reinicia o cronômetro
     }
 
     // Configuração do modal
@@ -307,6 +331,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function showCustomAlert(title, message, type) {
+        if (type === "success") {
+            clearInterval(timerInterval); // Para o cronômetro quando o jogo é resolvido
+        }
         modalTitle.textContent = title;
         modalMessage.textContent = message;
         

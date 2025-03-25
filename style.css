@@ -298,3 +298,27 @@
   background-color: var(--secondary-color); /* Cor de fundo ao passar o mouse */
   transform: scale(1.05); /* Efeito de aumento ao passar o mouse */
 }
+
+/* ===== CRONÔMETRO ===== */
+#timer {
+  margin-left: 5px;
+  padding: 12px 24px;
+  font-size: clamp(1rem, 4vw, 1.2rem);
+  color: var(--white);
+  background-color: var(--primary-color);
+  border: none;
+  border-radius: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  font-family: 'Noto Sans JP', sans-serif;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 80px;
+  transition: all 0.3s ease;
+}
+
+#timer:hover {
+  background-color: var(--secondary-color);
+  transform: scale(1.05);
+}
